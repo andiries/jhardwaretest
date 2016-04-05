@@ -61,7 +61,7 @@ public class App
             Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
             while(networks.hasMoreElements()) {
                 NetworkInterface network = networks.nextElement();
-                if (!network.getName().contains("eth")) {
+                if (!network.getName().contains("eth") && !network.getName().contains("ens")) {
                     continue;
                 }
 
