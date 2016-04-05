@@ -7,7 +7,11 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
+
+import static java.net.NetworkInterface.getNetworkInterfaces;
 
 public class App
 {
@@ -49,8 +53,6 @@ public class App
         }
 
         getNetworkMac();
-
-        System.out.println( "Hello World!" );
     }
 
     private static void getNetworkMac() {
@@ -66,11 +68,7 @@ public class App
 
             System.out.print("Current MAC address : ");
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < mac.length; i++) {
-                sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-            }
-            System.out.println(sb.toString());
+            printMACAddress(mac);
 
         } catch (UnknownHostException e) {
 
@@ -81,6 +79,14 @@ public class App
             e.printStackTrace();
 
         }
+    }
+
+    private static void printMACAddress(byte[] mac) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+        }
+        System.out.println(sb.toString());
     }
 
     private static void printComponentInfo(String clazz, Map<String, String> info) {
