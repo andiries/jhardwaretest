@@ -2,23 +2,24 @@ package de.netorium;
 
 import org.jutils.jhardware.HardwareInfo;
 import org.jutils.jhardware.model.*;
+import org.jutils.jhardware.util.OSDetector;
 
-import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
-
-import static java.net.NetworkInterface.getNetworkInterfaces;
 
 public class App
 {
     public static void main( String[] args ) {
 
-        Map<String, String> fullBiosInfo = null, fullMotherboardInfo = null, fullProcessorInfo = null,
-                fullOSInfo = null;
+        if (OSDetector.isMac()) {
+            System.out.println("We are on a mac. This OS is not supported by now\n");
+            return;
+        }
+
+
+        Map<String, String> fullBiosInfo, fullMotherboardInfo, fullProcessorInfo, fullOSInfo;
 
         try {
             BiosInfo biosInfo = HardwareInfo.getBiosInfo();
@@ -52,41 +53,33 @@ public class App
             System.out.println(e.getMessage());
         }
 
-        getNetworkMac();
+        getNetworkInterfaceId();
     }
 
-    private static void getNetworkMac() {
-        InetAddress ip;
+    private static void getNetworkInterfaceId() {
         try {
+            Enumeration<NetworkInterface> networks = NetworkInterface.getNetworkInterfaces();
+            while(networks.hasMoreElements()) {
+                NetworkInterface network = networks.nextElement();
+                if (!network.getName().contains("eth")) {
+                    continue;
+                }
 
-            ip = InetAddress.getLocalHost();
-            System.out.println("Current IP address : " + ip.getHostAddress());
+                byte[] mac = network.getHardwareAddress();
+                if(mac != null) {
+                    System.out.print("Current MAC address : ");
 
-            NetworkInterface network = NetworkInterface.getByInetAddress(ip);
-
-            byte[] mac = network.getHardwareAddress();
-
-            System.out.print("Current MAC address : ");
-
-            printMACAddress(mac);
-
-        } catch (UnknownHostException e) {
-
-            e.printStackTrace();
-
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(network.getName() + " ");
+                    for (int i = 0; i < mac.length; i++) {
+                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+                    }
+                    System.out.println(sb.toString());
+                }
+            }
         } catch (SocketException e){
-
-            e.printStackTrace();
-
+            System.out.println("Exception receiving network interface id: " + e.getMessage());
         }
-    }
-
-    private static void printMACAddress(byte[] mac) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < mac.length; i++) {
-            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
-        }
-        System.out.println(sb.toString());
     }
 
     private static void printComponentInfo(String clazz, Map<String, String> info) {
